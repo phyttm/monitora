@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento Diário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            display: block;
+            margin-bottom: 15px;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Monitoramento Diário</h1>
+        <label for="name">Qual é seu nome?</label>
+        <input type="text" id="name" placeholder="Digite seu nome">
+        <button onclick="showQuestions()">Realizar Treino</button>
+        <div id="questions" class="hidden">
+            <label for="recovery">De 0 a 10 o quão recuperado você está hoje?</label>
+            <input type="number" id="recovery" min="0" max="10">
+            <label for="stress">De 0 a 10 como está seu stress hoje?</label>
+            <input type="number" id="stress" min="0" max="10">
+            <label for="muscle_pain">De 0 a 10 como está sua dor muscular hoje?</label>
+            <input type="number" id="muscle_pain" min="0" max="10">
+            <label for="perception">De 0 a 10 qual foi sua percepção de esforço?</label>
+            <input type="number" id="perception" min="0" max="10">
+            <label for="sleep_quality">De 0 a 10 como foi a qualidade do seu sono?</label>
+            <input type="number" id="sleep_quality" min="0" max="10">
+            <label for="energy">De 0 a 10 como está sua disposição hoje?</label>
+            <input type="number" id="energy" min="0" max="10">
+            <label for="mood">De 0 a 10 como está o seu humor hoje?</label>
+            <input type="number" id="mood" min="0" max="10">
+            <button onclick="submitForm()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        function showQuestions() {
+            document.getElementById("questions").classList.remove("hidden");
+        }
+
+        function submitForm() {
+            var name = document.getElementById("name").value;
+            var recovery = document.getElementById("recovery").value;
+            var stress = document.getElementById("stress").value;
+            var muscle_pain = document.getElementById("muscle_pain").value;
+            var perception = document.getElementById("perception").value;
+            var sleep_quality = document.getElementById("sleep_quality").value;
+            var energy = document.getElementById("energy").value;
+            var mood = document.getElementById("mood").value;
+
+            // Criar um objeto com os dados do treino
+            var trainingData = {
+                name: name,
+                recovery: recovery,
+                stress: stress,
+                muscle_pain: muscle_pain,
+                perception: perception,
+                sleep_quality: sleep_quality,
+                energy: energy,
+                mood: mood
+            };
+
+            // Obter os dados armazenados localmente (se existirem)
+            var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
+
+            // Adicionar os novos dados ao array existente
+            storedData.push(trainingData);
+
+            // Armazenar os dados atualizados no LocalStorage
+            localStorage.setItem('trainingData', JSON.stringify(storedData));
+
+            alert("Respostas enviadas com sucesso!");
+        }
+    </script>
+</body>
+</html>
