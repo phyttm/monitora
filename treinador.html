@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desempenho Geral</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Desempenho Geral</h1>
+        <button onclick="showPerformance()">Ver Desempenho Geral</button>
+        <table id="performanceTable" class="hidden">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Percepção de Esforço (Média)</th>
+                </tr>
+            </thead>
+            <tbody id="performanceData">
+                <!-- Os dados serão preenchidos aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function showPerformance() {
+            // Obter os dados armazenados localmente
+            var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
+
+            // Calcular a média da percepção de esforço
+            var perceptionTotal = 0;
+            var count = 0;
+            for (var i = 0; i < storedData.length; i++) {
+                perceptionTotal += parseInt(storedData[i].perception);
+                count++;
+            }
+            var averagePerception = perceptionTotal / count;
+
+            // Preencher a tabela com os dados
+            var performanceTable = document.getElementById("performanceData");
+            performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
+
+            // Exibir a tabela
+            document.getElementById("performanceTable").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
