@@ -67,19 +67,6 @@
                 <!-- Os dados serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
-        
-        <h1>Treinos</h1>
-        <table id="trainingTable" class="hidden">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Descrição</th>
-                </tr>
-            </thead>
-            <tbody id="trainingData">
-                <!-- Os dados serão preenchidos aqui via JavaScript -->
-            </tbody>
-        </table>
     </div>
 
     <script>
@@ -96,15 +83,13 @@
             }
             var averagePerception = perceptionTotal / count;
 
-            // Preencher a tabela de desempenho com os dados
+            // Preencher a tabela com os dados
             var performanceTable = document.getElementById("performanceData");
             performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
 
-            // Exibir a tabela de desempenho
+            // Exibir a tabela
             document.getElementById("performanceTable").classList.remove("hidden");
-
-            // Preencher e exibir a tabela de treinos
-            var trainingTable = document.getElementById("trainingData");
-            trainingTable.innerHTML = "";
-            for (var i = 0; i < storedData.length; i++) {
-                var training = 
+        }
+    </script>
+</body>
+</html>
