@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,10 +58,6 @@
         th {
             background-color: #f2f2f2;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -96,17 +92,17 @@
             </tbody>
         </table>
         <h3>Treinos Salvos</h3>
-        <button onclick="toggleSavedTrainings()">Ver Treinos Salvos</button>
+        <button onclick="showSavedTrainings()">Ver Treinos Salvos</button>
         <button onclick="clearSavedTrainings()">Limpar Treinos Salvos</button>
         <table id="savedTrainingsTable" class="hidden">
             <thead>
                 <tr>
                     <th>Nome</th>
                     <th>Recuperação</th>
-                    <th>Stress</th>
+                    <th>Estresse</th>
                     <th>Dor Muscular</th>
                     <th>Percepção de Esforço</th>
-                    <th>Qualidade de Sono</th>
+                    <th>Qualidade do Sono</th>
                     <th>Disposição</th>
                     <th>Humor</th>
                 </tr>
@@ -119,10 +115,7 @@
 
     <script>
         function showPerformance() {
-            // Obter os dados armazenados localmente
             var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
-
-            // Calcular a média da percepção de esforço
             var perceptionTotal = 0;
             var count = 0;
             for (var i = 0; i < storedData.length; i++) {
@@ -131,16 +124,13 @@
             }
             var averagePerception = perceptionTotal / count;
 
-            // Preencher a tabela com os dados
             var performanceTable = document.getElementById("performanceData");
             performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
 
-            // Exibir a tabela
             document.getElementById("performanceTable").classList.remove("hidden");
         }
 
         function clearPerformance() {
-            // Limpar os resultados da tabela de desempenho geral
             var performanceTable = document.getElementById("performanceData");
             performanceTable.innerHTML = "";
             document.getElementById("performanceTable").classList.add("hidden");
@@ -156,13 +146,9 @@
         }
 
         function showIndividualPerformance() {
-            // Obter os dados armazenados localmente
-            var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
-
-            // Objeto para armazenar os valores da percepção de esforço para cada nome
+            var storedData = JSON.parse(localStorage.getItem('trainingData')) || {};
             var perceptionValues = {};
 
-            // Calcular a média da percepção de esforço para cada usuário individualmente
             for (var i = 0; i < storedData.length; i++) {
                 var name = storedData[i].name;
                 var perception = parseInt(storedData[i].perception);
@@ -178,7 +164,6 @@
                 }
             }
 
-            // Preencher a tabela com os dados individuais
             var individualPerformanceTable = document.getElementById("individualPerformanceData");
             individualPerformanceTable.innerHTML = "";
 
@@ -190,12 +175,10 @@
                 }
             }
 
-            // Exibir a tabela
             document.getElementById("individualPerformanceTable").classList.remove("hidden");
         }
 
         function clearIndividualPerformance() {
-            // Limpar os resultados da tabela de desempenho individual
             var individualPerformanceTable = document.getElementById("individualPerformanceData");
             individualPerformanceTable.innerHTML = "";
             document.getElementById("individualPerformanceTable").classList.add("hidden");
@@ -210,54 +193,28 @@
             }
         }
 
-        function toggleSavedTrainings() {
-            // Exibir ou ocultar os treinos salvos
-            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
-            savedTrainingsTable.classList.toggle("hidden");
+        function showSavedTrainings() {
+            var savedTrainingsData = JSON.parse(localStorage.getItem('trainingData')) || [];
 
-            // Mostrar os treinos salvos quando o botão é clicado
-            if (!savedTrainingsTable.classList.contains("hidden")) {
-                showSavedTrainings();
-            }
+            var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
+            savedTrainingsTableBody.innerHTML = "";
+
+            savedTrainingsData.forEach(function(training) {
+                var row = "<tr><td>" + training.name + "</td><td>" + training.recovery + "</td><td>" + training.stress + "</td><td>" + training.muscle_pain + "</td><td>" + training.perception + "</td><td>" + training.sleep_quality + "</td><td>" + training.energy + "</td><td>" + training.mood + "</td></tr>";
+                savedTrainingsTableBody.innerHTML += row;
+            });
+
+            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
+            savedTrainingsTable.classList.remove("hidden");
         }
 
         function clearSavedTrainings() {
-            // Limpar os treinos salvos
-            localStorage.removeItem('savedTrainings');
-
-            // Limpar a tabela de treinos salvos
+            localStorage.removeItem('trainingData');
             var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
             savedTrainingsTableBody.innerHTML = "";
-
-            // Esconder a tabela de treinos salvos
             var savedTrainingsTable = document.getElementById("savedTrainingsTable");
             savedTrainingsTable.classList.add("hidden");
-        }
-
-        function showSavedTrainings() {
-            // Obter os treinos salvos armazenados localmente
-            var savedTrainings = JSON.parse(localStorage.getItem('savedTrainings')) || [];
-
-            // Preencher a tabela de treinos salvos com os dados
-            var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
-            savedTrainingsTableBody.innerHTML = "";
-
-            for (var i = 0; i < savedTrainings.length; i++) {
-                var training = savedTrainings[i];
-                var row = "<tr>";
-                row += "<td>" + training.name + "</td>";
-                row += "<td>" + training.recovery + "</td>";
-                row += "<td>" + training.stress + "</td>";
-                row += "<td>" + training.musclePain + "</td>";
-                row += "<td>" + training.perception + "</td>";
-                row += "<td>" + training.sleepQuality + "</td>";
-                row += "<td>" + training.energy + "</td>";
-                row += "<td>" + training.mood + "</td>";
-                row += "</tr>";
-                savedTrainingsTableBody.innerHTML += row;
-            }
         }
     </script>
 </body>
 </html>
-
