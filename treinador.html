@@ -58,12 +58,16 @@
         th {
             background-color: #f2f2f2;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Treinos</h1>
-        <h3>Desempenho Geral</h3> <!-- Subtítulo ajustado -->
+        <h3>Desempenho Geral</h3>
         <button onclick="togglePerformance()">Ver Desempenho Geral</button>
         <button onclick="clearPerformance()">Limpar Desempenho Geral</button>
         <table id="performanceTable" class="hidden">
@@ -91,7 +95,7 @@
                 <!-- Os dados serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
-        <h3>Treinos Salvos</h3> <!-- Subtítulo ajustado -->
+        <h3>Treinos Salvos</h3>
         <button onclick="toggleSavedTrainings()">Ver Treinos Salvos</button>
         <button onclick="clearSavedTrainings()">Limpar Treinos Salvos</button>
         <table id="savedTrainingsTable" class="hidden">
@@ -210,6 +214,11 @@
             // Exibir ou ocultar os treinos salvos
             var savedTrainingsTable = document.getElementById("savedTrainingsTable");
             savedTrainingsTable.classList.toggle("hidden");
+
+            // Mostrar os treinos salvos quando o botão é clicado
+            if (!savedTrainingsTable.classList.contains("hidden")) {
+                showSavedTrainings();
+            }
         }
 
         function clearSavedTrainings() {
@@ -224,6 +233,31 @@
             var savedTrainingsTable = document.getElementById("savedTrainingsTable");
             savedTrainingsTable.classList.add("hidden");
         }
+
+        function showSavedTrainings() {
+            // Obter os treinos salvos armazenados localmente
+            var savedTrainings = JSON.parse(localStorage.getItem('savedTrainings')) || [];
+
+            // Preencher a tabela de treinos salvos com os dados
+            var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
+            savedTrainingsTableBody.innerHTML = "";
+
+            for (var i = 0; i < savedTrainings.length; i++) {
+                var training = savedTrainings[i];
+                var row = "<tr>";
+                row += "<td>" + training.name + "</td>";
+                row += "<td>" + training.recovery + "</td>";
+                row += "<td>" + training.stress + "</td>";
+                row += "<td>" + training.musclePain + "</td>";
+                row += "<td>" + training.perception + "</td>";
+                row += "<td>" + training.sleepQuality + "</td>";
+                row += "<td>" + training.energy + "</td>";
+                row += "<td>" + training.mood + "</td>";
+                row += "</tr>";
+                savedTrainingsTableBody.innerHTML += row;
+            }
+        }
     </script>
 </body>
 </html>
+
