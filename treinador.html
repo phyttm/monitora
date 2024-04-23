@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desempenho Geral</title>
+    <title>Treinos - Desempenho Geral</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,8 +22,14 @@
         }
         
         .container h1 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .container h2 {
             margin-bottom: 20px;
             text-align: center;
+            color: #555;
         }
 
         button {
@@ -50,11 +56,18 @@
         th {
             background-color: #f2f2f2;
         }
+
+        .container h3 {
+            margin-bottom: 10px;
+            text-align: center;
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Desempenho Geral</h1>
+        <h1>Treinos</h1>
+        <h2>Desempenho Geral</h2>
         <button onclick="showPerformance()">Ver Desempenho Geral</button>
         <table id="performanceTable" class="hidden">
             <thead>
@@ -64,6 +77,19 @@
                 </tr>
             </thead>
             <tbody id="performanceData">
+                <!-- Os dados serão preenchidos aqui via JavaScript -->
+            </tbody>
+        </table>
+        <h3>Desempenho Individual</h3>
+        <button onclick="showIndividualPerformance()">Ver Desempenho Individual</button>
+        <table id="individualPerformanceTable" class="hidden">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Percepção de Esforço (Média)</th>
+                </tr>
+            </thead>
+            <tbody id="individualPerformanceData">
                 <!-- Os dados serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
@@ -89,6 +115,25 @@
 
             // Exibir a tabela
             document.getElementById("performanceTable").classList.remove("hidden");
+        }
+
+        function showIndividualPerformance() {
+            // Obter os dados armazenados localmente
+            var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
+
+            // Preencher a tabela com os dados individuais
+            var individualPerformanceTable = document.getElementById("individualPerformanceData");
+            individualPerformanceTable.innerHTML = "";
+
+            for (var i = 0; i < storedData.length; i++) {
+                var name = storedData[i].name;
+                var perception = storedData[i].perception;
+                var row = "<tr><td>" + name + "</td><td>" + perception + "</td></tr>";
+                individualPerformanceTable.innerHTML += row;
+            }
+
+            // Exibir a tabela
+            document.getElementById("individualPerformanceTable").classList.remove("hidden");
         }
     </script>
 </body>
