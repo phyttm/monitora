@@ -115,22 +115,32 @@
 
     <script>
         function showPerformance() {
-            var storedData = JSON.parse(localStorage.getItem('trainingData')) || [];
-            var perceptionTotal = 0;
-            var count = 0;
-            for (var i = 0; i < storedData.length; i++) {
-                perceptionTotal += parseInt(storedData[i].perception);
-                count++;
-            }
-            var averagePerception = perceptionTotal / count;
+            fetch('http://localhost:3000/view-training-data')
+                .then(response => response.json())
+                .then(data => {
+                    var perceptionTotal = 0;
+                    var count = data.length;
 
-            var performanceTable = document.getElementById("performanceData");
-            performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
+                    data.forEach(training => {
+                        perceptionTotal += parseInt(training.perception);
+                    });
 
-            document.getElementById("performanceTable").classList.remove("hidden");
+                    var averagePerception = perceptionTotal / count;
+
+                    var performanceTable = document.getElementById("performanceData");
+                    performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
+
+                    document.getElementById("performanceTable").classList.remove("hidden");
+                })
+                .catch(error => {
+                    console.error('Erro ao obter os dados do servidor:', error);
+                });
         }
 
         function clearPerformance() {
+            // Não é mais necessário limpar os dados do localStorage
+            // localStorage.removeItem('trainingData');
+
             var performanceTable = document.getElementById("performanceData");
             performanceTable.innerHTML = "";
             document.getElementById("performanceTable").classList.add("hidden");
@@ -144,77 +154,8 @@
                 clearPerformance();
             }
         }
-
-        function showIndividualPerformance() {
-            var storedData = JSON.parse(localStorage.getItem('trainingData')) || {};
-            var perceptionValues = {};
-
-            for (var i = 0; i < storedData.length; i++) {
-                var name = storedData[i].name;
-                var perception = parseInt(storedData[i].perception);
-
-                if (!perceptionValues[name]) {
-                    perceptionValues[name] = {
-                        total: perception,
-                        count: 1
-                    };
-                } else {
-                    perceptionValues[name].total += perception;
-                    perceptionValues[name].count++;
-                }
-            }
-
-            var individualPerformanceTable = document.getElementById("individualPerformanceData");
-            individualPerformanceTable.innerHTML = "";
-
-            for (var name in perceptionValues) {
-                if (perceptionValues.hasOwnProperty(name)) {
-                    var averagePerception = perceptionValues[name].total / perceptionValues[name].count;
-                    var row = "<tr><td>" + name + "</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
-                    individualPerformanceTable.innerHTML += row;
-                }
-            }
-
-            document.getElementById("individualPerformanceTable").classList.remove("hidden");
-        }
-
-        function clearIndividualPerformance() {
-            var individualPerformanceTable = document.getElementById("individualPerformanceData");
-            individualPerformanceTable.innerHTML = "";
-            document.getElementById("individualPerformanceTable").classList.add("hidden");
-        }
-
-        function toggleIndividualPerformance() {
-            var individualPerformanceTable = document.getElementById("individualPerformanceTable");
-            if (individualPerformanceTable.classList.contains("hidden")) {
-                showIndividualPerformance();
-            } else {
-                clearIndividualPerformance();
-            }
-        }
-
-        function showSavedTrainings() {
-            var savedTrainingsData = JSON.parse(localStorage.getItem('trainingData')) || [];
-
-            var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
-            savedTrainingsTableBody.innerHTML = "";
-
-            savedTrainingsData.forEach(function(training) {
-                var row = "<tr><td>" + training.name + "</td><td>" + training.recovery + "</td><td>" + training.stress + "</td><td>" + training.muscle_pain + "</td><td>" + training.perception + "</td><td>" + training.sleep_quality + "</td><td>" + training.energy + "</td><td>" + training.mood + "</td></tr>";
-                savedTrainingsTableBody.innerHTML += row;
-            });
-
-            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
-            savedTrainingsTable.classList.remove("hidden");
-        }
-
-        function clearSavedTrainings() {
-            localStorage.removeItem('trainingData');
-            var savedTrainingsTableBody = document.getElementById("savedTrainingsData");
-            savedTrainingsTableBody.innerHTML = "";
-            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
-            savedTrainingsTable.classList.add("hidden");
-        }
     </script>
+</body>
+</html>
 </body>
 </html>
