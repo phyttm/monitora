@@ -90,55 +90,47 @@
             document.getElementById("questions").classList.remove("hidden");
         }
 
-function submitForm() {
-    var name = document.getElementById("name").value;
-    var recovery = document.getElementById("recovery").value;
-    var stress = document.getElementById("stress").value;
-    var muscle_pain = document.getElementById("muscle_pain").value;
-    var perception = document.getElementById("perception").value;
-    var sleep_quality = document.getElementById("sleep_quality").value;
-    var energy = document.getElementById("energy").value;
-    var mood = document.getElementById("mood").value;
+        function submitForm() {
+            var name = document.getElementById("name").value;
+            var recovery = document.getElementById("recovery").value;
+            var stress = document.getElementById("stress").value;
+            var muscle_pain = document.getElementById("muscle_pain").value;
+            var perception = document.getElementById("perception").value;
+            var sleep_quality = document.getElementById("sleep_quality").value;
+            var energy = document.getElementById("energy").value;
+            var mood = document.getElementById("mood").value;
 
-    var trainingData = {
-        name: name,
-        recovery: recovery,
-        stress: stress,
-        muscle_pain: muscle_pain,
-        perception: perception,
-        sleep_quality: sleep_quality,
-        energy: energy,
-        mood: mood
-    };
+            var trainingData = {
+                name: name,
+                recovery: recovery,
+                stress: stress,
+                muscle_pain: muscle_pain,
+                perception: perception,
+                sleep_quality: sleep_quality,
+                energy: energy,
+                mood: mood
+            };
 
-    // Enviar os dados para o servidor backend
-    fetch('http://localhost:3000/submit-training-data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(trainingData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Verificar se os dados foram salvos com sucesso no backend
-        if (data.success) {
-            alert("Respostas enviadas com sucesso!");
-        } else {
-            alert("Ocorreu um erro ao enviar as respostas. Por favor, tente novamente.");
+            // Salvar os dados no LocalStorage
+            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
+            trainingDataList.push(trainingData);
+            localStorage.setItem('trainingDataList', JSON.stringify(trainingDataList));
+            
+            alert("Respostas salvas com sucesso!");
+
+            // Exibir os dados compartilhados após salvar
+            showSharedData();
         }
-    })
-    .catch(error => {
-        console.error('Erro ao enviar os dados para o servidor:', error);
-        alert("Ocorreu um erro ao enviar as respostas. Por favor, tente novamente.");
-    });
-}
 
-
-        // Funções para exibir dados compartilhados do segundo site
+        // Funções para exibir dados compartilhados
         function showSharedData() {
-            var sharedData = JSON.parse(localStorage.getItem('sharedData')) || [];
+            var sharedData = JSON.parse(localStorage.getItem('trainingDataList')) || [];
             var sharedDataDiv = document.getElementById('sharedDataDiv');
+            if (!sharedDataDiv) {
+                sharedDataDiv = document.createElement('div');
+                sharedDataDiv.id = 'sharedDataDiv';
+                document.body.appendChild(sharedDataDiv);
+            }
             sharedDataDiv.innerHTML = '';
             sharedData.forEach(function(data) {
                 var dataDiv = document.createElement('div');
