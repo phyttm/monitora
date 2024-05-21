@@ -65,6 +65,16 @@
         .hidden {
             display: none;
         }
+
+        .chart-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        canvas {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -118,8 +128,13 @@
                 <!-- Os dados dos treinos salvos serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
+        <h3>Gráfico</h3>
+        <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function showPerformance() {
             var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
@@ -211,6 +226,74 @@
             individualPerformanceData.innerHTML = "";
             document.getElementById("individualPerformanceTable").classList.add("hidden");
         }
+
+        function viewGraph() {
+            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
+            var labels = ['Média de Desempenho Geral', 'Média do Desempenho Individual'];
+            var data = [];
+
+            var perceptionTotal = 0;
+            var count = trainingDataList.length;
+
+            trainingDataList.forEach(training => {
+                perceptionTotal += parseInt(training.perception);
+            });
+
+            var averagePerception = perceptionTotal / count;
+
+            data.push(averagePerception.toFixed(2));
+
+            var perceptionSum = {};
+            var perceptionCount = {};
+
+            trainingDataList.forEach(training => {
+                if (!perceptionSum[training.name]) {
+                    perceptionSum[training.name] = 0;
+                    perceptionCount[training.name] = 0;
+                }
+                perceptionSum[training.name] += parseInt(training.perception);
+                perceptionCount[training.name] += 1;
+            });
+
+            var individualTotal = 0;
+            var individualCount = 0;
+
+            for (var name in perceptionSum) {
+                var averagePerception = perceptionSum[name] / perceptionCount[name];
+                individualTotal += averagePerception;
+                individualCount++;
+            }
+
+            var averageIndividualPerception = individualTotal / individualCount;
+            data.push(averageIndividualPerception.toFixed(2));
+
+            var ctx = document.getElementById('performanceChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Percepção de Esforço (Média)',
+                        data: data,
+                        backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'],
+                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exibir gráfico automaticamente ao carregar a página
+        window.onload = function() {
+            viewGraph();
+        };
     </script>
 </body>
 </html>
