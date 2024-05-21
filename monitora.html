@@ -123,6 +123,53 @@
 
             alert("Respostas salvas com sucesso!");
             document.getElementById("questions").classList.add("hidden");
+
+            // Enviar os dados para o GitHub
+            enviarDadosParaGitHub(trainingData);
+        }
+
+        function enviarDadosParaGitHub(trainingData) {
+            const token = 'SEU_TOKEN_DE_ACESSO'; // Substitua pelo seu token de acesso pessoal do GitHub
+            const repoOwner = 'seu-usuario';
+            const repoName = 'seu-repositorio';
+            const filePath = 'respostas.json';
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sha = data.sha;
+                const conteudoBase64 = btoa(JSON.stringify(trainingData, null, 2));
+
+                fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Adicionar novo treino',
+                        content: conteudoBase64,
+                        sha: sha
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Dados enviados com sucesso:', data);
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar dados:', error);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao obter SHA do arquivo:', error);
+            });
         }
     </script>
 </body>
