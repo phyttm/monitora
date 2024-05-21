@@ -88,6 +88,7 @@
                 <tr>
                     <th>Nome</th>
                     <th>Percepção de Esforço (Média)</th>
+                    <th>Tendência</th>
                 </tr>
             </thead>
             <tbody id="performanceData">
@@ -128,14 +129,21 @@
                 <!-- Os dados dos treinos salvos serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
-        <h3>Gráfico</h3>
+        <h3>Gráficos</h3>
         <div class="chart-container">
-            <canvas id="performanceChart"></canvas>
+            <h4>Desempenho Geral</h4>
+            <canvas id="generalPerformanceChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h4>Desempenho Individual</h4>
+            <canvas id="individualPerformanceChart"></canvas>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        var previousGeneralData = 0;
+
         function showPerformance() {
             var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
             var perceptionTotal = 0;
@@ -148,7 +156,16 @@
             var averagePerception = perceptionTotal / count;
 
             var performanceTable = document.getElementById("performanceData");
-            performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
+            var trend = "";
+            if (averagePerception > previousGeneralData) {
+                trend = "↑";
+            } else if (averagePerception < previousGeneralData) {
+                trend = "↓";
+            } else {
+                trend = "→";
+            }
+            previousGeneralData = averagePerception;
+            performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td><td>" + trend + "</td></tr>";
 
             document.getElementById("performanceTable").classList.remove("hidden");
         }
@@ -229,8 +246,10 @@
 
         function viewGraph() {
             var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
-            var labels = ['Média de Desempenho Geral', 'Média do Desempenho Individual'];
-            var data = [];
+
+            // Dados para o gráfico de desempenho geral
+            var generalLabels = ['Média de Desempenho Geral'];
+            var generalData = [];
 
             var perceptionTotal = 0;
             var count = trainingDataList.length;
@@ -240,8 +259,33 @@
             });
 
             var averagePerception = perceptionTotal / count;
+            generalData.push(averagePerception.toFixed(2));
 
-            data.push(averagePerception.toFixed(2));
+            var generalCtx = document.getElementById('generalPerformanceChart').getContext('2d');
+            new Chart(generalCtx, {
+                type: 'bar',
+                data: {
+                    labels: generalLabels,
+                    datasets: [{
+                        label: 'Percepção de Esforço (Média)',
+                        data: generalData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Dados para o gráfico de desempenho individual
+            var individualLabels = [];
+            var individualData = [];
 
             var perceptionSum = {};
             var perceptionCount = {};
@@ -255,28 +299,22 @@
                 perceptionCount[training.name] += 1;
             });
 
-            var individualTotal = 0;
-            var individualCount = 0;
-
             for (var name in perceptionSum) {
                 var averagePerception = perceptionSum[name] / perceptionCount[name];
-                individualTotal += averagePerception;
-                individualCount++;
+                individualLabels.push(name);
+                individualData.push(averagePerception.toFixed(2));
             }
 
-            var averageIndividualPerception = individualTotal / individualCount;
-            data.push(averageIndividualPerception.toFixed(2));
-
-            var ctx = document.getElementById('performanceChart').getContext('2d');
-            var chart = new Chart(ctx, {
+            var individualCtx = document.getElementById('individualPerformanceChart').getContext('2d');
+            new Chart(individualCtx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: individualLabels,
                     datasets: [{
                         label: 'Percepção de Esforço (Média)',
-                        data: data,
-                        backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'],
-                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                        data: individualData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -297,3 +335,5 @@
     </script>
 </body>
 </html>
+
+
