@@ -152,7 +152,7 @@
                 const now = new Date();
                 const month = now.toLocaleString('default', { month: 'long' }).toLowerCase();
                 const week = `semana${Math.ceil(now.getDate() / 7)}`;
-                const treino = `treino${Object.keys(conteudoAtual.meses[month][week] || {}).length + 1}`;
+                const treino = `treino${Object.keys(conteudoAtual.meses[month]?.[week] || {}).length + 1}`;
 
                 if (!conteudoAtual.meses[month]) {
                     conteudoAtual.meses[month] = {};
