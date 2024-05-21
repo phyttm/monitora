@@ -129,9 +129,9 @@
         }
 
         function enviarDadosParaGitHub(trainingData) {
-            const token = 'SEU_TOKEN_DE_ACESSO'; // Substitua pelo seu token de acesso pessoal do GitHub
-            const repoOwner = 'seu-usuario';
-            const repoName = 'seu-repositorio';
+            const token = 'servidor'; // Token de acesso do GitHub
+            const repoOwner = 'phyttm';
+            const repoName = 'monitora';
             const filePath = 'respostas.json';
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
@@ -145,7 +145,24 @@
             .then(response => response.json())
             .then(data => {
                 const sha = data.sha;
-                const conteudoBase64 = btoa(JSON.stringify(trainingData, null, 2));
+                const conteudoBase64 = data.content;
+                const conteudoAtual = JSON.parse(atob(conteudoBase64));
+                
+                // Atualizar o JSON existente com os novos dados
+                const now = new Date();
+                const month = now.toLocaleString('default', { month: 'long' }).toLowerCase();
+                const week = `semana${Math.ceil(now.getDate() / 7)}`;
+                const treino = `treino${Object.keys(conteudoAtual.meses[month][week] || {}).length + 1}`;
+
+                if (!conteudoAtual.meses[month]) {
+                    conteudoAtual.meses[month] = {};
+                }
+                if (!conteudoAtual.meses[month][week]) {
+                    conteudoAtual.meses[month][week] = {};
+                }
+                conteudoAtual.meses[month][week][treino] = trainingData;
+
+                const updatedContent = btoa(JSON.stringify(conteudoAtual, null, 2));
 
                 fetch(apiUrl, {
                     method: 'PUT',
@@ -155,7 +172,7 @@
                     },
                     body: JSON.stringify({
                         message: 'Adicionar novo treino',
-                        content: conteudoBase64,
+                        content: updatedContent,
                         sha: sha
                     })
                 })
