@@ -110,7 +110,7 @@
             </tbody>
         </table>
         <h3>Treinos Salvos</h3>
-        <button onclick="showSavedTrainings()">Ver Treinos Salvos</button>
+        <button onclick="toggleSavedTrainings()">Ver Treinos Salvos</button>
         <button onclick="clearSavedTrainings()">Limpar Treinos Salvos</button>
         <table id="savedTrainingsTable" class="hidden">
             <thead>
@@ -202,6 +202,15 @@
             var savedTrainingsData = document.getElementById("savedTrainingsData");
             savedTrainingsData.innerHTML = "";
             document.getElementById("savedTrainingsTable").classList.add("hidden");
+        }
+
+        function toggleSavedTrainings() {
+            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
+            if (savedTrainingsTable.classList.contains("hidden")) {
+                showSavedTrainings();
+            } else {
+                clearSavedTrainings();
+            }
         }
 
         function toggleIndividualPerformance() {
