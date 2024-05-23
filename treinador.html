@@ -81,8 +81,8 @@
     <div class="container">
         <h1>Treinos</h1>
         <h3>Desempenho Geral</h3>
-        <button onclick="togglePerformance()">Ver Desempenho Geral</button>
-        <button onclick="clearPerformance()">Limpar Desempenho Geral</button>
+        <button onclick="toggleTable('performanceTable', showPerformance)">Ver Desempenho Geral</button>
+        <button onclick="clearTable('performanceTable')">Limpar Desempenho Geral</button>
         <table id="performanceTable" class="hidden">
             <thead>
                 <tr>
@@ -91,13 +91,12 @@
                     <th>Tendência</th>
                 </tr>
             </thead>
-            <tbody id="performanceData">
-                <!-- Os dados serão preenchidos aqui via JavaScript -->
-            </tbody>
+            <tbody id="performanceData"></tbody>
         </table>
+
         <h3>Desempenho Individual</h3>
-        <button onclick="toggleIndividualPerformance()">Ver Desempenho Individual</button>
-        <button onclick="clearIndividualPerformance()">Limpar Desempenho Individual</button>
+        <button onclick="toggleTable('individualPerformanceTable', showIndividualPerformance)">Ver Desempenho Individual</button>
+        <button onclick="clearTable('individualPerformanceTable')">Limpar Desempenho Individual</button>
         <table id="individualPerformanceTable" class="hidden">
             <thead>
                 <tr>
@@ -105,13 +104,12 @@
                     <th>Percepção de Esforço (Média)</th>
                 </tr>
             </thead>
-            <tbody id="individualPerformanceData">
-                <!-- Os dados serão preenchidos aqui via JavaScript -->
-            </tbody>
+            <tbody id="individualPerformanceData"></tbody>
         </table>
+
         <h3>Treinos Salvos</h3>
-        <button onclick="toggleSavedTrainings()">Ver Treinos Salvos</button>
-        <button onclick="clearSavedTrainings()">Limpar Treinos Salvos</button>
+        <button onclick="toggleTable('savedTrainingsTable', showSavedTrainings)">Ver Treinos Salvos</button>
+        <button onclick="clearTable('savedTrainingsTable')">Limpar Treinos Salvos</button>
         <table id="savedTrainingsTable" class="hidden">
             <thead>
                 <tr>
@@ -125,10 +123,9 @@
                     <th>Humor</th>
                 </tr>
             </thead>
-            <tbody id="savedTrainingsData">
-                <!-- Os dados dos treinos salvos serão preenchidos aqui via JavaScript -->
-            </tbody>
+            <tbody id="savedTrainingsData"></tbody>
         </table>
+
         <h3>Gráficos</h3>
         <div class="chart-container">
             <h4>Desempenho Geral</h4>
@@ -144,87 +141,40 @@
     <script>
         var previousGeneralData = 0;
 
+        // Funções de Manipulação de Tabela
+        function toggleTable(tableId, showFunction) {
+            var table = document.getElementById(tableId);
+            if (table.classList.contains("hidden")) {
+                showFunction();
+            } else {
+                clearTable(tableId);
+            }
+        }
+
+        function clearTable(tableId) {
+            document.getElementById(tableId).classList.add("hidden");
+            document.querySelector(`#${tableId} tbody`).innerHTML = "";
+        }
+
         function showPerformance() {
-            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
-            var perceptionTotal = 0;
-            var count = trainingDataList.length;
+            var trainingDataList = getTrainingDataList();
+            if (!trainingDataList.length) return;
 
-            trainingDataList.forEach(training => {
-                perceptionTotal += parseInt(training.perception);
-            });
+            var perceptionTotal = trainingDataList.reduce((sum, training) => sum + parseInt(training.perception), 0);
+            var averagePerception = perceptionTotal / trainingDataList.length;
 
-            var averagePerception = perceptionTotal / count;
+            var trend = getTrend(averagePerception);
+            previousGeneralData = averagePerception;
 
             var performanceTable = document.getElementById("performanceData");
-            var trend = "";
-            if (averagePerception > previousGeneralData) {
-                trend = "↑";
-            } else if (averagePerception < previousGeneralData) {
-                trend = "↓";
-            } else {
-                trend = "→";
-            }
-            previousGeneralData = averagePerception;
-            performanceTable.innerHTML = "<tr><td>Todos os Atletas</td><td>" + averagePerception.toFixed(2) + "</td><td>" + trend + "</td></tr>";
-
+            performanceTable.innerHTML = `<tr><td>Todos os Atletas</td><td>${averagePerception.toFixed(2)}</td><td>${trend}</td></tr>`;
             document.getElementById("performanceTable").classList.remove("hidden");
         }
 
-        function clearPerformance() {
-            var performanceTable = document.getElementById("performanceData");
-            performanceTable.innerHTML = "";
-            document.getElementById("performanceTable").classList.add("hidden");
-        }
-
-        function togglePerformance() {
-            var performanceTable = document.getElementById("performanceTable");
-            if (performanceTable.classList.contains("hidden")) {
-                showPerformance();
-            } else {
-                clearPerformance();
-            }
-        }
-
-        function showSavedTrainings() {
-            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
-            var savedTrainingsData = document.getElementById("savedTrainingsData");
-            savedTrainingsData.innerHTML = "";
-            trainingDataList.forEach(training => {
-                var row = "<tr><td>" + training.name + "</td><td>" + training.recovery + "</td><td>" + training.stress + "</td><td>" + training.muscle_pain + "</td><td>" + training.perception + "</td><td>" + training.sleep_quality + "</td><td>" + training.energy + "</td><td>" + training.mood + "</td></tr>";
-                savedTrainingsData.innerHTML += row;
-            });
-
-            document.getElementById("savedTrainingsTable").classList.remove("hidden");
-        }
-
-        function clearSavedTrainings() {
-            localStorage.removeItem('trainingDataList');
-            var savedTrainingsData = document.getElementById("savedTrainingsData");
-            savedTrainingsData.innerHTML = "";
-            document.getElementById("savedTrainingsTable").classList.add("hidden");
-        }
-
-        function toggleSavedTrainings() {
-            var savedTrainingsTable = document.getElementById("savedTrainingsTable");
-            if (savedTrainingsTable.classList.contains("hidden")) {
-                showSavedTrainings();
-            } else {
-                clearSavedTrainings();
-            }
-        }
-
-        function toggleIndividualPerformance() {
-            var individualPerformanceTable = document.getElementById("individualPerformanceTable");
-            if (individualPerformanceTable.classList.contains("hidden")) {
-                showIndividualPerformance();
-            } else {
-                clearIndividualPerformance();
-            }
-        }
-
         function showIndividualPerformance() {
-            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
-            var individualPerformanceData = document.getElementById("individualPerformanceData");
+            var trainingDataList = getTrainingDataList();
+            if (!trainingDataList.length) return;
+
             var perceptionSum = {};
             var perceptionCount = {};
 
@@ -237,65 +187,71 @@
                 perceptionCount[training.name] += 1;
             });
 
-            individualPerformanceData.innerHTML = "";
-            for (var name in perceptionSum) {
+            var individualPerformanceData = document.getElementById("individualPerformanceData");
+            individualPerformanceData.innerHTML = Object.keys(perceptionSum).map(name => {
                 var averagePerception = perceptionSum[name] / perceptionCount[name];
-                var row = "<tr><td>" + name + "</td><td>" + averagePerception.toFixed(2) + "</td></tr>";
-                individualPerformanceData.innerHTML += row;
-            }
-
+                return `<tr><td>${name}</td><td>${averagePerception.toFixed(2)}</td></tr>`;
+            }).join('');
             document.getElementById("individualPerformanceTable").classList.remove("hidden");
         }
 
-        function clearIndividualPerformance() {
-            var individualPerformanceData = document.getElementById("individualPerformanceData");
-            individualPerformanceData.innerHTML = "";
-            document.getElementById("individualPerformanceTable").classList.add("hidden");
+        function showSavedTrainings() {
+            var trainingDataList = getTrainingDataList();
+            if (!trainingDataList.length) return;
+
+            var savedTrainingsData = document.getElementById("savedTrainingsData");
+            savedTrainingsData.innerHTML = trainingDataList.map(training => {
+                return `<tr>
+                    <td>${training.name}</td>
+                    <td>${training.recovery}</td>
+                    <td>${training.stress}</td>
+                    <td>${training.muscle_pain}</td>
+                    <td>${training.perception}</td>
+                    <td>${training.sleep_quality}</td>
+                    <td>${training.energy}</td>
+                    <td>${training.mood}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById("savedTrainingsTable").classList.remove("hidden");
         }
 
+        function getTrainingDataList() {
+            return JSON.parse(localStorage.getItem('trainingDataList')) || [];
+        }
+
+        function getTrend(averagePerception) {
+            if (averagePerception > previousGeneralData) {
+                return "↑";
+            } else if (averagePerception < previousGeneralData) {
+                return "↓";
+            } else {
+                return "→";
+            }
+        }
+
+        // Função de Criação de Gráficos
         function viewGraph() {
-            var trainingDataList = JSON.parse(localStorage.getItem('trainingDataList')) || [];
+            var trainingDataList = getTrainingDataList();
+
+            if (!trainingDataList.length) return;
 
             // Dados para o gráfico de desempenho geral
-            var generalLabels = ['Média de Desempenho Geral'];
-            var generalData = [];
+            var generalData = getAveragePerception(trainingDataList);
 
-            var perceptionTotal = 0;
-            var count = trainingDataList.length;
-
-            trainingDataList.forEach(training => {
-                perceptionTotal += parseInt(training.perception);
-            });
-
-            var averagePerception = perceptionTotal / count;
-            generalData.push(averagePerception.toFixed(2));
-
-            var generalCtx = document.getElementById('generalPerformanceChart').getContext('2d');
-            new Chart(generalCtx, {
-                type: 'bar',
-                data: {
-                    labels: generalLabels,
-                    datasets: [{
-                        label: 'Percepção de Esforço (Média)',
-                        data: generalData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
+            createChart('generalPerformanceChart', ['Média de Desempenho Geral'], [generalData], 'Percepção de Esforço (Média)', 'rgba(255, 99, 132, 0.5)', 'rgba(255, 99, 132, 1)');
 
             // Dados para o gráfico de desempenho individual
-            var individualLabels = [];
-            var individualData = [];
+            var { labels, data } = getIndividualPerformanceData(trainingDataList);
 
+            createChart('individualPerformanceChart', labels, data, 'Percepção de Esforço (Média)', 'rgba(54, 162, 235, 0.5)', 'rgba(54, 162, 235, 1)');
+        }
+
+        function getAveragePerception(trainingDataList) {
+            var perceptionTotal = trainingDataList.reduce((sum, training) => sum + parseInt(training.perception), 0);
+            return (perceptionTotal / trainingDataList.length).toFixed(2);
+        }
+
+        function getIndividualPerformanceData(trainingDataList) {
             var perceptionSum = {};
             var perceptionCount = {};
 
@@ -308,22 +264,27 @@
                 perceptionCount[training.name] += 1;
             });
 
+            var labels = [];
+            var data = [];
             for (var name in perceptionSum) {
-                var averagePerception = perceptionSum[name] / perceptionCount[name];
-                individualLabels.push(name);
-                individualData.push(averagePerception.toFixed(2));
+                labels.push(name);
+                data.push((perceptionSum[name] / perceptionCount[name]).toFixed(2));
             }
 
-            var individualCtx = document.getElementById('individualPerformanceChart').getContext('2d');
-            new Chart(individualCtx, {
+            return { labels, data };
+        }
+
+        function createChart(canvasId, labels, data, label, backgroundColor, borderColor) {
+            var ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: individualLabels,
+                    labels: labels,
                     datasets: [{
-                        label: 'Percepção de Esforço (Média)',
-                        data: individualData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        label: label,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
                         borderWidth: 1
                     }]
                 },
