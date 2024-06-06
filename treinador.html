@@ -139,11 +139,30 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        var previousGeneralData = 0;
+        // Lista de dados fornecida diretamente
+        const data = [
+            ["Atleta 1", "7", "3", "4", "6", "7", "8", "5"],
+            ["Atleta 2", "6", "5", "3", "5", "6", "7", "6"],
+            ["Atleta 3", "8", "4", "5", "7", "7", "9", "8"]
+        ];
 
-        // Funções de Manipulação de Tabela
+        let previousGeneralData = 0;
+
+        function getTrainingDataListFromList() {
+            return data.map(d => ({
+                name: d[0],
+                recovery: parseInt(d[1]),
+                stress: parseInt(d[2]),
+                muscle_pain: parseInt(d[3]),
+                perception: parseInt(d[4]),
+                sleep_quality: parseInt(d[5]),
+                energy: parseInt(d[6]),
+                mood: parseInt(d[7])
+            }));
+        }
+
         function toggleTable(tableId, showFunction) {
-            var table = document.getElementById(tableId);
+            const table = document.getElementById(tableId);
             if (table.classList.contains("hidden")) {
                 showFunction();
             } else {
@@ -156,50 +175,60 @@
             document.querySelector(`#${tableId} tbody`).innerHTML = "";
         }
 
+        function getTrend(averagePerception) {
+            if (averagePerception > previousGeneralData) {
+                return "↑";
+            } else if (averagePerception < previousGeneralData) {
+                return "↓";
+            } else {
+                return "→";
+            }
+        }
+
         function showPerformance() {
-            var trainingDataList = getTrainingDataList();
+            const trainingDataList = getTrainingDataListFromList();
             if (!trainingDataList.length) return;
 
-            var perceptionTotal = trainingDataList.reduce((sum, training) => sum + parseInt(training.perception), 0);
-            var averagePerception = perceptionTotal / trainingDataList.length;
+            const perceptionTotal = trainingDataList.reduce((sum, training) => sum + training.perception, 0);
+            const averagePerception = perceptionTotal / trainingDataList.length;
 
-            var trend = getTrend(averagePerception);
+            const trend = getTrend(averagePerception);
             previousGeneralData = averagePerception;
 
-            var performanceTable = document.getElementById("performanceData");
+            const performanceTable = document.getElementById("performanceData");
             performanceTable.innerHTML = `<tr><td>Todos os Atletas</td><td>${averagePerception.toFixed(2)}</td><td>${trend}</td></tr>`;
             document.getElementById("performanceTable").classList.remove("hidden");
         }
 
         function showIndividualPerformance() {
-            var trainingDataList = getTrainingDataList();
+            const trainingDataList = getTrainingDataListFromList();
             if (!trainingDataList.length) return;
 
-            var perceptionSum = {};
-            var perceptionCount = {};
+            const perceptionSum = {};
+            const perceptionCount = {};
 
             trainingDataList.forEach(training => {
                 if (!perceptionSum[training.name]) {
                     perceptionSum[training.name] = 0;
                     perceptionCount[training.name] = 0;
                 }
-                perceptionSum[training.name] += parseInt(training.perception);
+                perceptionSum[training.name] += training.perception;
                 perceptionCount[training.name] += 1;
             });
 
-            var individualPerformanceData = document.getElementById("individualPerformanceData");
+            const individualPerformanceData = document.getElementById("individualPerformanceData");
             individualPerformanceData.innerHTML = Object.keys(perceptionSum).map(name => {
-                var averagePerception = perceptionSum[name] / perceptionCount[name];
+                const averagePerception = perceptionSum[name] / perceptionCount[name];
                 return `<tr><td>${name}</td><td>${averagePerception.toFixed(2)}</td></tr>`;
             }).join('');
             document.getElementById("individualPerformanceTable").classList.remove("hidden");
         }
 
         function showSavedTrainings() {
-            var trainingDataList = getTrainingDataList();
+            const trainingDataList = getTrainingDataListFromList();
             if (!trainingDataList.length) return;
 
-            var savedTrainingsData = document.getElementById("savedTrainingsData");
+            const savedTrainingsData = document.getElementById("savedTrainingsData");
             savedTrainingsData.innerHTML = trainingDataList.map(training => {
                 return `<tr>
                     <td>${training.name}</td>
@@ -215,76 +244,23 @@
             document.getElementById("savedTrainingsTable").classList.remove("hidden");
         }
 
-        function getTrainingDataList() {
-            return JSON.parse(localStorage.getItem('trainingDataList')) || [];
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const generalPerformanceChartCtx = document.getElementById('generalPerformanceChart').getContext('2d');
+            const individualPerformanceChartCtx = document.getElementById('individualPerformanceChart').getContext('2d');
 
-        function getTrend(averagePerception) {
-            if (averagePerception > previousGeneralData) {
-                return "↑";
-            } else if (averagePerception < previousGeneralData) {
-                return "↓";
-            } else {
-                return "→";
-            }
-        }
+            const trainingDataList = getTrainingDataListFromList();
+            const averagePerceptions = trainingDataList.map(training => training.perception);
+            const labels = trainingDataList.map(training => training.name);
 
-        // Função de Criação de Gráficos
-        function viewGraph() {
-            var trainingDataList = getTrainingDataList();
-
-            if (!trainingDataList.length) return;
-
-            // Dados para o gráfico de desempenho geral
-            var generalData = getAveragePerception(trainingDataList);
-
-            createChart('generalPerformanceChart', ['Média de Desempenho Geral'], [generalData], 'Percepção de Esforço (Média)', 'rgba(255, 99, 132, 0.5)', 'rgba(255, 99, 132, 1)');
-
-            // Dados para o gráfico de desempenho individual
-            var { labels, data } = getIndividualPerformanceData(trainingDataList);
-
-            createChart('individualPerformanceChart', labels, data, 'Percepção de Esforço (Média)', 'rgba(54, 162, 235, 0.5)', 'rgba(54, 162, 235, 1)');
-        }
-
-        function getAveragePerception(trainingDataList) {
-            var perceptionTotal = trainingDataList.reduce((sum, training) => sum + parseInt(training.perception), 0);
-            return (perceptionTotal / trainingDataList.length).toFixed(2);
-        }
-
-        function getIndividualPerformanceData(trainingDataList) {
-            var perceptionSum = {};
-            var perceptionCount = {};
-
-            trainingDataList.forEach(training => {
-                if (!perceptionSum[training.name]) {
-                    perceptionSum[training.name] = 0;
-                    perceptionCount[training.name] = 0;
-                }
-                perceptionSum[training.name] += parseInt(training.perception);
-                perceptionCount[training.name] += 1;
-            });
-
-            var labels = [];
-            var data = [];
-            for (var name in perceptionSum) {
-                labels.push(name);
-                data.push((perceptionSum[name] / perceptionCount[name]).toFixed(2));
-            }
-
-            return { labels, data };
-        }
-
-        function createChart(canvasId, labels, data, label, backgroundColor, borderColor) {
-            var ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
+            new Chart(generalPerformanceChartCtx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: ['Todos os Atletas'],
                     datasets: [{
-                        label: label,
-                        data: data,
-                        backgroundColor: backgroundColor,
-                        borderColor: borderColor,
+                        label: 'Percepção de Esforço (Média)',
+                        data: [averagePerceptions.reduce((a, b) => a + b, 0) / averagePerceptions.length],
+                        backgroundColor: 'rgba(0, 195, 255, 0.5)',
+                        borderColor: 'rgba(0, 195, 255, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -296,12 +272,28 @@
                     }
                 }
             });
-        }
 
-        // Exibir gráfico automaticamente ao carregar a página
-        window.onload = function() {
-            viewGraph();
-        };
+            new Chart(individualPerformanceChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Percepção de Esforço',
+                        data: averagePerceptions,
+                        backgroundColor: 'rgba(0, 195, 255, 0.5)',
+                        borderColor: 'rgba(0, 195, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
